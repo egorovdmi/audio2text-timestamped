@@ -1,0 +1,19 @@
+{
+  "file_path": "test_simple.aiff",
+  "detected_language": "de",
+  "language_probability": 0.38,
+  "duration": 2.14,
+  "full_text": "Hello World, this is our test.",
+  "sentences": [
+    {
+      "sentence": "Hello World, this is our test.",
+      "start_time": 0.0,
+      "end_time": 2.0,
+      "duration": 2.0,
+      "language": "de",
+      "language_probability": 0.38
+    }
+  ],
+  "word_count": 6,
+  "sentence_count": 1
+}

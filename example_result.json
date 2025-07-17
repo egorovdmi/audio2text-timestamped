@@ -1,0 +1,51 @@
+{
+  "file_path": "example_audio.mp3",
+  "detected_language": "ru",
+  "language_probability": 0.95,
+  "duration": 45.32,
+  "full_text": "Привет! Это пример работы системы распознавания речи с временными метками. Система может обрабатывать аудиофайлы различных форматов и возвращать результат в виде JSON. Каждое предложение имеет точные временные метки начала и конца. Это очень полезно для создания субтитров или анализа аудиоконтента.",
+  "sentences": [
+    {
+      "sentence": "Привет!",
+      "start_time": 0.5,
+      "end_time": 1.2,
+      "duration": 0.7,
+      "language": "ru",
+      "language_probability": 0.95
+    },
+    {
+      "sentence": "Это пример работы системы распознавания речи с временными метками.",
+      "start_time": 2.1,
+      "end_time": 6.8,
+      "duration": 4.7,
+      "language": "ru",
+      "language_probability": 0.95
+    },
+    {
+      "sentence": "Система может обрабатывать аудиофайлы различных форматов и возвращать результат в виде JSON.",
+      "start_time": 7.5,
+      "end_time": 14.2,
+      "duration": 6.7,
+      "language": "ru",
+      "language_probability": 0.95
+    },
+    {
+      "sentence": "Каждое предложение имеет точные временные метки начала и конца.",
+      "start_time": 15.1,
+      "end_time": 20.3,
+      "duration": 5.2,
+      "language": "ru",
+      "language_probability": 0.95
+    },
+    {
+      "sentence": "Это очень полезно для создания субтитров или анализа аудиоконтента.",
+      "start_time": 21.0,
+      "end_time": 26.8,
+      "duration": 5.8,
+      "language": "ru",
+      "language_probability": 0.95
+    }
+  ],
+  "word_count": 42,
+  "sentence_count": 5
+}
