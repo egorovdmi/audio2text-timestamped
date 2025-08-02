@@ -100,75 +100,37 @@ class AudioToTextConverter:
     def _map_sentences_to_timestamps(self, segments: List[Segment], sentences: List[str]) -> List[Dict]:
         """
         Map sentences to their corresponding timestamps
+        SIMPLIFIED APPROACH: Use Whisper segments as-is for more accurate timestamps
         
         Args:
             segments: Whisper segments with word-level timestamps
-            sentences: List of sentences
+            sentences: List of sentences (may be ignored in favor of segments)
             
         Returns:
             List of sentence dictionaries with timestamps
         """
-        if not sentences:
+        if not segments:
             return []
-        
+
         result = []
-        sentence_idx = 0
-        current_sentence = sentences[0] if sentences else ""
-        sentence_words = current_sentence.split()
-        word_idx_in_sentence = 0
-        sentence_start_time = None
-        sentence_end_time = None
         
-        for segment in segments:
-            if not hasattr(segment, 'words') or not segment.words:
+        # USE WHISPER SEGMENTS DIRECTLY - they often have more accurate timestamps
+        for i, segment in enumerate(segments):
+            # Clean up segment text
+            segment_text = segment.text.strip()
+            
+            if not segment_text:
                 continue
                 
-            for word_info in segment.words:
-                word = word_info.word.strip()
-                
-                # Skip empty words
-                if not word:
-                    continue
-                
-                # Set sentence start time
-                if sentence_start_time is None:
-                    sentence_start_time = word_info.start
-                
-                # Update sentence end time
-                sentence_end_time = word_info.end
-                
-                # Check if we've reached the end of current sentence
-                word_idx_in_sentence += 1
-                
-                # If we've processed all words in current sentence
-                if word_idx_in_sentence >= len(sentence_words):
-                    # Add current sentence to result
-                    if sentence_start_time is not None and sentence_end_time is not None:
-                        result.append({
-                            'sentence': current_sentence,
-                            'start_time': round(sentence_start_time, 2),
-                            'end_time': round(sentence_end_time, 2),
-                            'duration': round(sentence_end_time - sentence_start_time, 2)
-                        })
-                    
-                    # Move to next sentence
-                    sentence_idx += 1
-                    if sentence_idx < len(sentences):
-                        current_sentence = sentences[sentence_idx]
-                        sentence_words = current_sentence.split()
-                        word_idx_in_sentence = 0
-                        sentence_start_time = None
-                        sentence_end_time = None
-                    else:
-                        break
-        
-        # Handle any remaining sentence
-        if sentence_idx < len(sentences) and sentence_start_time is not None and sentence_end_time is not None:
+            # Use segment's built-in timestamps - these are usually accurate
+            start_time = segment.start
+            end_time = segment.end
+            
             result.append({
-                'sentence': sentences[sentence_idx],
-                'start_time': round(sentence_start_time, 2),
-                'end_time': round(sentence_end_time, 2),
-                'duration': round(sentence_end_time - sentence_start_time, 2)
+                'sentence': segment_text,
+                'start_time': round(start_time, 2),
+                'end_time': round(end_time, 2),
+                'duration': round(end_time - start_time, 2)
             })
         
         return result
@@ -221,11 +183,9 @@ class AudioToTextConverter:
             # Extract full text
             full_text = ' '.join([segment.text.strip() for segment in segments_list])
             
-            # Split into sentences
-            sentences = self._split_into_sentences(full_text)
-            
-            # Map sentences to timestamps
-            sentence_timestamps = self._map_sentences_to_timestamps(segments_list, sentences)
+            # Instead of splitting into sentences, use Whisper segments directly
+            # This provides more accurate timestamps since Whisper already segments properly
+            sentence_timestamps = self._map_sentences_to_timestamps(segments_list, [])
             
             # Add language detection for each sentence (using overall detected language)
             for sentence_info in sentence_timestamps:
@@ -240,10 +200,10 @@ class AudioToTextConverter:
                 'full_text': full_text,
                 'sentences': sentence_timestamps,
                 'word_count': len(full_text.split()),
-                'sentence_count': len(sentences)
+                'sentence_count': len(sentence_timestamps)
             }
             
-            logger.info(f"Transcription completed: {len(sentences)} sentences, {info.language} language")
+            logger.info(f"Transcription completed: {len(sentence_timestamps)} segments, {info.language} language")
             return result
             
         except Exception as e:

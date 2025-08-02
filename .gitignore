@@ -40,3 +40,7 @@ result.srt
 # Temporary files
 *.tmp
 *.log
+
+*.mp3
+*.srt
+*.mp4
