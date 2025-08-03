@@ -166,6 +166,7 @@ class SpeakerDiarizer:
         """
         Post-process diarization results
         - Filter short segments
+        - Resolve overlapping segments by keeping longer ones
         - Merge close segments from same speaker
         - Convert to our JSON format
         """
@@ -190,10 +191,71 @@ class SpeakerDiarizer:
         # Sort by start time
         segments.sort(key=lambda x: x["start_time"])
         
+        # Resolve overlapping segments by keeping longer ones
+        resolved_segments = self._resolve_overlapping_segments(segments)
+        
         # Merge close segments from same speaker
-        merged_segments = self._merge_close_segments(segments)
+        merged_segments = self._merge_close_segments(resolved_segments)
         
         return merged_segments
+
+    def _resolve_overlapping_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Resolve overlapping segments by keeping the longer ones and adjusting boundaries
+        
+        Args:
+            segments: List of segments sorted by start_time
+            
+        Returns:
+            List of segments with resolved overlaps
+        """
+        if not segments:
+            return segments
+        
+        resolved = []
+        
+        for current in segments:
+            should_add = True
+            
+            # Check for overlaps with already resolved segments
+            for i, existing in enumerate(resolved):
+                # Check if segments overlap
+                if (current["start_time"] < existing["end_time"] and 
+                    current["end_time"] > existing["start_time"]):
+                    
+                    overlap_start = max(current["start_time"], existing["start_time"])
+                    overlap_end = min(current["end_time"], existing["end_time"])
+                    overlap_duration = overlap_end - overlap_start
+                    
+                    # If there's significant overlap (more than 0.1 seconds)
+                    if overlap_duration > 0.1:
+                        if current["duration"] > existing["duration"]:
+                            # Current segment is longer - replace existing
+                            resolved[i] = current
+                            should_add = False
+                            break
+                        else:
+                            # Existing segment is longer - skip current
+                            should_add = False
+                            break
+                    else:
+                        # Minor overlap - adjust boundaries
+                        if current["start_time"] < existing["end_time"] and current["start_time"] > existing["start_time"]:
+                            # Adjust current to start after existing ends
+                            new_start = existing["end_time"]
+                            if new_start < current["end_time"]:
+                                current = {
+                                    **current,
+                                    "start_time": round(new_start, 2),
+                                    "duration": round(current["end_time"] - new_start, 2)
+                                }
+            
+            if should_add:
+                resolved.append(current)
+        
+        # Sort by start time again
+        resolved.sort(key=lambda x: x["start_time"])
+        return resolved
     
     def _merge_close_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Merge segments from same speaker that are close together"""
@@ -213,8 +275,6 @@ class SpeakerDiarizer:
                 # Merge segments
                 last["end_time"] = current["end_time"]
                 last["duration"] = round(last["end_time"] - last["start_time"], 2)
-                # Update sentence to reflect merged segment
-                last["sentence"] = f"[Speaker {last['speaker']}]"
             else:
                 merged.append(current)
         
