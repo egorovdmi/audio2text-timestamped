@@ -1,0 +1,25 @@
+# Alternative requirements - install in order to avoid sentencepiece issues
+
+# Step 1: Core dependencies (install first)
+faster-whisper>=1.0.0
+torch>=2.0.0
+torchaudio>=2.0.0
+
+# Step 2: Install pyannote.audio with --no-deps flag manually:
+# pip install --no-deps pyannote.audio>=3.1.0
+
+# Step 3: pyannote.audio dependencies (without speechbrain)
+asteroid-filterbanks>=0.4
+einops>=0.6.0
+omegaconf>=2.1,<3.0
+pyannote.core>=5.0.0
+pyannote.database>=5.0.1
+pyannote.metrics>=3.2
+pyannote.pipeline>=3.0.1
+pytorch-metric-learning>=2.1.0
+rich>=12.0.0
+semver>=3.0.0
+soundfile>=0.12.1
+tensorboardX>=2.6
+torch-audiomentations>=0.11.0
+torchmetrics>=0.11.0
